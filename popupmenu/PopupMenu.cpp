@@ -18,7 +18,7 @@ namespace
 	// メインウィンドウのハンドルを得る
 	HWND GetWindowHandle()
 	{
-		return static_cast<HWND>(Platform::Windows::Window::GetHWND());
+		return reinterpret_cast<HWND>(Platform::Windows::Window::GetHWND());
 	}
 
 	// プロセスのインスタンスハンドルを得る
@@ -47,7 +47,7 @@ namespace
 		switch (message)
 		{
 		case WM_USER_SET_MAINTHREADID:
-			mainThreadId = (DWORD)wParam;
+			mainThreadId = static_cast<DWORD>(wParam);
 			break;
 
 		case WM_USER_SHOWMENU:
@@ -89,7 +89,7 @@ PopupMenu::PopupMenu(WORD menuResourceId)
 	SetWindowProc(hWnd, WindowProc);
 
 	// 別スレッドで実行されるウィンドウプロシージャに、必要な情報を渡しておく
-	PostMessage(hWnd, WM_USER_SET_MAINTHREADID, (WPARAM)GetCurrentThreadId(), 0);
+	PostMessage(hWnd, WM_USER_SET_MAINTHREADID, static_cast<WPARAM>(GetCurrentThreadId()), 0);
 }
 
 PopupMenu::~PopupMenu()
@@ -98,7 +98,7 @@ PopupMenu::~PopupMenu()
 
 void PopupMenu::show()
 {
-	PostMessage(GetWindowHandle(), WM_USER_SHOWMENU, (WPARAM)menuResourceId_, 0);
+	PostMessage(GetWindowHandle(), WM_USER_SHOWMENU, static_cast<WPARAM>(menuResourceId_), 0);
 }
 
 Optional<WORD> PopupMenu::selectedItem() const
@@ -106,7 +106,7 @@ Optional<WORD> PopupMenu::selectedItem() const
 	MSG msg{};
 	Optional<WORD> id;
 
-	while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+	while (PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE))
 	{
 		BOOL ret = GetMessage(&msg, nullptr, 0, 0);
 
@@ -116,7 +116,7 @@ Optional<WORD> PopupMenu::selectedItem() const
 		}
 		else if (msg.message == WM_USER_MENUCOMMAND)
 		{
-			id = (WORD)msg.wParam;
+			id = static_cast<WORD>(msg.wParam);
 		}
 	}
 
